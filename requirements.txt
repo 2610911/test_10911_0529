@@ -1,1 +1,79 @@
-streamlit
+
+import streamlit as st
+
+# 1. 페이지 설정
+st.set_page_config(page_title="디지털 자판기", page_icon="🥤", layout="centered")
+st.title("🥤 스트림릿 디지털 자판기")
+st.write("돈을 넣고 원하는 음료수를 선택하세요!")
+
+---
+
+# 2. 초기 데이터 세팅 (앱이 리프레시되어도 유지되도록 세션 상태 사용)
+if "balance" not in st.session_state:
+    st.session_state.balance = 0  # 투입된 총 금액
+
+if "inventory" not in st.session_state:
+    # 음료수 메뉴, 가격, 초기 재고
+    st.session_state.inventory = {
+        "콜라 🥤": {"price": 1200, "stock": 5},
+        "사이다 🍏": {"price": 1100, "stock": 3},
+        "감귤쥬스 🍊": {"price": 1500, "stock": 4},
+        "생수 💧": {"price": 800, "stock": 10},
+    }
+
+# 3. 사이드바: 금액 투입구
+st.sidebar.header("💰 금액 투입구")
+insert_500 = st.sidebar.button("🪙 500원 투입")
+insert_1000 = st.sidebar.button("💵 1,000원 투입")
+
+if insert_500:
+    st.session_state.balance += 500
+    st.rerun()
+if insert_1000:
+    st.session_state.balance += 1000
+    st.rerun()
+
+# 잔돈 반환 버튼
+if st.sidebar.button("🔴 잔돈 반환하기"):
+    if st.session_state.balance > 0:
+        st.sidebar.success(f"🪙 잔돈 {st.session_state.balance}원이 반환되었습니다!")
+        st.session_state.balance = 0
+    else:
+        st.sidebar.warning("반환할 잔돈이 없습니다.")
+
+---
+
+# 4. 메인 화면: 자판기 상태 표시
+st.metric(label="현재 투입된 금액", value=f"{st.session_state.balance} 원")
+
+st.subheader("🛒 음료수 메뉴")
+# 2열(Column) 레이아웃으로 음료수 배치
+cols = st.columns(2)
+
+for i, (item, info) in enumerate(st.session_state.inventory.items()):
+    with cols[i % 2]:
+        st.write(f"### {item}")
+        st.write(f"**가격:** {info['price']}원 | **재고:** {info['stock']}개")
+        
+        # 구매 가능 여부 체크
+        if info['stock'] <= 0:
+            st.button(f"품절 ❌", key=item, disabled=True)
+        elif st.session_state.balance < info['price']:
+            st.button(f"금액 부족", key=item, disabled=True)
+        else:
+            # 구매 버튼 활성화
+            if st.button(f"구입하기 🛒", key=item):
+                st.session_state.balance -= info['price']  # 금액 차감
+                st.session_state.inventory[item]['stock'] -= 1  # 재고 차감
+                st.success(f"🎉 {item} 대기열에서 툭! 맛있게 드세요!")
+                st.rerun()
+
+---
+# 5. 관리자 모드 (재고 충전용 hidden 기능)
+with st.expander("🛠️ 관리자 모드"):
+    st.write("자판기 재고를 충전합니다.")
+    if st.button("모든 음료수 재고 +5 충전"):
+        for item in st.session_state.inventory:
+            st.session_state.inventory[item]['stock'] += 5
+        st.success("재고가 충전되었습니다!")
+        st.rerun()
