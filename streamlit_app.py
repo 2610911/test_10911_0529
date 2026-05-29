@@ -1,7 +1,7 @@
 import streamlit as st
 
 # 1. 앱 페이지 설정
-st.set_page_config(page_title="스트림릿 자판기", page_icon="🥤", layout="centered")
+st.set_page_config(page_title="스트fff림릿 자판기", page_icon="🥤", layout="centered")
 
 # 2. 자판기 데이터 초기화 (세션 상태 활용)
 if "balance" not in st.session_state:
