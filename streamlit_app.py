@@ -79,7 +79,7 @@ for i, (name, info) in enumerate(st.session_state.inventory.items()):
 st.markdown("---")
 
 # 5. 구매 내역 및 관리자 모드
-st.subheader("📜 최근 이용 내역")
+st.subheader("📜 최근 g이용 내역")
 if st.session_state.history:
     for log in st.session_state.history[:5]:  # 최근 5개만 표시
         st.caption(log)
